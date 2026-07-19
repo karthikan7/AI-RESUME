@@ -13,6 +13,7 @@ async function generateInterViewReportController(req, res) {
     const resumeContent = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
     const { selfDescription, jobDescription } = req.body
 
+    //call the ai service 
     const interViewReportByAi = await generateInterviewReport({
         resume: resumeContent.text,
         selfDescription,
@@ -83,7 +84,7 @@ async function generateResumePdfController(req, res) {
         })
     }
 
-    const { resume, jobDescription, selfDescription } = interviewReport
+    const { resume, jobDescription, selfDescription } = interviewReport //take resume and disc from that interview id 
 
     const pdfBuffer = await generateResumePdf({ resume, jobDescription, selfDescription })
 

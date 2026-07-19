@@ -1,7 +1,9 @@
 const { GoogleGenAI } = require("@google/genai")
 const { z } = require("zod")
 const { zodToJsonSchema } = require("zod-to-json-schema")
-const puppeteer = require("puppeteer")
+const chromium = require("@sparticuz/chromium")
+const puppeteer = require("puppeteer-core")
+
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GOOGLE_GENAI_API_KEY
@@ -56,27 +58,29 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
 }
 
 
-
 async function generatePdfFromHtml(htmlContent) {
-    const browser = await puppeteer.launch()
+    const browser = await puppeteer.launch({
+        args: chromium.args,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+    })
     const page = await browser.newPage();
     await page.setContent(htmlContent, { waitUntil: "networkidle0" })
 
     const pdfBuffer = await page.pdf({
-        format: "A4", margin: {
-            top: "20mm",
-            bottom: "20mm",
-            left: "15mm",
-            right: "15mm"
-        }
+        format: "A4",
+        margin: { top: "20mm", bottom: "20mm", left: "15mm", right: "15mm" }
     })
 
     await browser.close()
-
     return pdfBuffer
 }
 
-async function generateResumePdf({ resume, selfDescription, jobDescription }) {
+
+
+async function generateResumePdf({ resume, selfDescription, jobDescription }) { // in this function we give resume and dicription as a input then it will generate respective resume
+
+    // have to generate html from ai then pappet convert html to pdf then we will send that resumme 
 
     const resumePdfSchema = z.object({
         html: z.string().describe("The HTML content of the resume which can be converted to PDF using any library like puppeteer")
@@ -99,15 +103,15 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
         model: "gemini-3-flash-preview",
         contents: prompt,
         config: {
-            responseMimeType: "application/json",
-            responseSchema: zodToJsonSchema(resumePdfSchema),
+            responseMimeType: "application/json",//response should be in json
+            responseSchema: zodToJsonSchema(resumePdfSchema),//ans should be in html schema 
         }
     })
 
 
     const jsonContent = JSON.parse(response.text)
 
-    const pdfBuffer = await generatePdfFromHtml(jsonContent.html)
+    const pdfBuffer = await generatePdfFromHtml(jsonContent.html)//it will give the pdf
 
     return pdfBuffer
 
