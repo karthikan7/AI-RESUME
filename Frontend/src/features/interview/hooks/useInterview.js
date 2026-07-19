@@ -63,6 +63,7 @@ export const useInterview = () => {
         setLoading(true)
         let response = null
         try {
+            //it will download the pdf 
             response = await generateResumePdf({ interviewReportId })
             const url = window.URL.createObjectURL(new Blob([ response ], { type: "application/pdf" }))
             const link = document.createElement("a")
@@ -82,7 +83,7 @@ export const useInterview = () => {
         if (interviewId) {
             getReportById(interviewId)
         } else {
-            getReports()
+            getReports()// tore users all report 
         }
     }, [ interviewId ])
 

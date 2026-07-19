@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router'
 
 const Home = () => {
 
-    const { loading, generateReport,reports } = useInterview()
+    const { loading, generateReport, reports } = useInterview()
     const [ jobDescription, setJobDescription ] = useState("")
     const [ selfDescription, setSelfDescription ] = useState("")
     const resumeInputRef = useRef()
@@ -21,6 +21,7 @@ const Home = () => {
     if (loading) {
         return (
             <main className='loading-screen'>
+                <div className='spinner' />
                 <h1>Loading your interview plan...</h1>
             </main>
         )
