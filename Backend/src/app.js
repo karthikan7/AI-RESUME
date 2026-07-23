@@ -7,22 +7,10 @@ const app = express()
 
 app.use(express.json())
 app.use(cookieParser())
-const allowedOrigins = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://ai-resume-7b9s.onrender.com"
-];
-if (process.env.FRONTEND_URL) {
-    allowedOrigins.push(process.env.FRONTEND_URL);
-}
-
 app.use(cors({
     origin: function (origin, callback) {
-        // allow requests with no origin (like mobile apps or curl requests)
-        if (!origin || allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
-        return callback(null, true); // Fallback allow in dev
+        // Echo back the request origin to satisfy credentials requirement
+        callback(null, origin || true);
     },
     credentials: true
 }))
