@@ -11,6 +11,27 @@ const ai = new GoogleGenAI({
 })
 
 
+// Retry wrapper with exponential backoff for Gemini API rate limit (429) errors
+async function withRetry(fn, maxRetries = 3, baseDelayMs = 2000) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            return await fn()
+        } catch (err) {
+            const status = err?.status ?? err?.response?.status ?? err?.httpError?.statusCode
+            const isRateLimit = status === 429 || (err?.message && err.message.includes("429"))
+
+            if (isRateLimit && attempt < maxRetries) {
+                const delay = baseDelayMs * Math.pow(2, attempt - 1) // 2s, 4s, 8s
+                console.warn(`Gemini rate limit hit. Retrying in ${delay / 1000}s... (attempt ${attempt}/${maxRetries})`)
+                await new Promise(resolve => setTimeout(resolve, delay))
+            } else {
+                throw err
+            }
+        }
+    }
+}
+
+
 const interviewReportSchema = z.object({
     matchScore: z.number().describe("A score between 0 and 100 indicating how well the candidate's profile matches the job describe"),
     technicalQuestions: z.array(z.object({
@@ -44,14 +65,14 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
                         Job Description: ${jobDescription}
 `
 
-    const response = await ai.models.generateContent({
+    const response = await withRetry(() => ai.models.generateContent({
         model: "gemini-2.0-flash",
         contents: prompt,
         config: {
             responseMimeType: "application/json",
             responseSchema: zodToJsonSchema(interviewReportSchema),//output should be in zod structure
         }
-    })
+    }))
 
     return JSON.parse(response.text)
 
@@ -100,14 +121,14 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) { 
                         The resume should not be so lengthy, it should ideally be 1-2 pages long when converted to PDF. Focus on quality rather than quantity and make sure to include all the relevant information that can increase the candidate's chances of getting an interview call for the given job description.
                     `
 
-    const response = await ai.models.generateContent({
+    const response = await withRetry(() => ai.models.generateContent({
         model: "gemini-2.0-flash",
         contents: prompt,
         config: {
             responseMimeType: "application/json",//response should be in json
             responseSchema: zodToJsonSchema(resumePdfSchema),//ans should be in html schema 
         }
-    })
+    }))
 
 
     const jsonContent = JSON.parse(response.text)
