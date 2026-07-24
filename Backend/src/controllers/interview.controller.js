@@ -5,53 +5,27 @@ const interviewReportModel = require("../models/interviewReport.model")
 async function parsePdfBuffer(buffer) {
     if (!buffer || !Buffer.isBuffer(buffer)) return ""
 
-    let text = ""
-
-    // 1. Try standard pdf-parse (v1.1.1 function)
     try {
-        const pdfParse = require("pdf-parse")
-        if (typeof pdfParse === "function") {
-            const result = await Promise.resolve(pdfParse(buffer)).catch(() => null)
-            if (result && result.text && typeof result.text === "string" && result.text.trim()) {
-                text = result.text.trim()
-            }
+        const parsed = await pdfParse(buffer)
+        if (parsed && parsed.text && typeof parsed.text === "string" && parsed.text.trim()) {
+            return parsed.text.trim()
         }
     } catch (e) {
-        console.warn("pdf-parse v1 attempt failed:", e.message)
+        console.warn("pdfParse failed:", e.message)
     }
 
-    if (text) return text
-
-    // 2. Try pdf-parse PDFParse class (v2.x) if present
-    try {
-        const pdfModule = require("pdf-parse")
-        if (pdfModule && pdfModule.PDFParse) {
-            const uint8 = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength)
-            const parser = new pdfModule.PDFParse({ data: uint8, verbosity: 0 })
-            await Promise.resolve(parser.load()).catch(() => null)
-            const result = await Promise.resolve(parser.getText()).catch(() => null)
-            if (result && result.text && typeof result.text === "string" && result.text.trim()) {
-                text = result.text.trim()
-            }
-        }
-    } catch (e) {
-        console.warn("pdf-parse v2 attempt failed:", e.message)
-    }
-
-    if (text) return text
-
-    // 3. Fallback: extract clean text directly from buffer if library parsers fail
+    // Fallback: extract plain text directly from buffer if pdfParse fails
     try {
         const str = buffer.toString("utf8")
-        const cleanText = str.replace(/[^\x20-\x7E\n\r\t]/g, " ").replace(/\s+/g, " ")
-        if (cleanText.trim().length > 15) {
-            return cleanText.substring(0, 4000).trim()
+        const cleanText = str.replace(/[^\x20-\x7E\n\r\t]/g, " ").replace(/\s+/g, " ").trim()
+        if (cleanText.length > 15) {
+            return cleanText.substring(0, 4000)
         }
     } catch (e) {
-        console.warn("Raw PDF buffer fallback failed:", e.message)
+        console.warn("Raw PDF string fallback failed:", e.message)
     }
 
-    return "Resume PDF uploaded."
+    return "Resume PDF document attached."
 }
 
 /**
