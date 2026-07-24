@@ -3,39 +3,49 @@ const { generateInterviewReport, generateResumePdf } = require("../services/ai.s
 const interviewReportModel = require("../models/interviewReport.model")
 
 async function parsePdfBuffer(buffer) {
-    // 1. Try standard pdfParse(buffer)
+    if (!buffer || !Buffer.isBuffer(buffer)) return ""
+
+    // 1. Try standard pdf-parse (v1.1.1 function)
     try {
+        const pdfParse = require("pdf-parse")
         if (typeof pdfParse === "function") {
             const parsed = await pdfParse(buffer)
-            if (parsed && parsed.text && parsed.text.trim()) return parsed.text.trim()
+            if (parsed && parsed.text && typeof parsed.text === "string" && parsed.text.trim()) {
+                return parsed.text.trim()
+            }
         }
     } catch (e) {
-        console.warn("pdfParse v1 attempt failed:", e.message)
+        console.warn("pdf-parse function attempt failed:", e.message)
     }
 
-    // 2. Try pdf-parse v2 PDFParse class if present
+    // 2. Try pdf-parse PDFParse class (v2.x) if present
     try {
         const pdfModule = require("pdf-parse")
-        if (pdfModule.PDFParse) {
-            const parser = new pdfModule.PDFParse({ data: buffer })
+        if (pdfModule && pdfModule.PDFParse) {
+            const uint8 = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength)
+            const parser = new pdfModule.PDFParse({ data: uint8 })
             await parser.load()
             const parsed = await parser.getText()
-            if (parsed && parsed.text && parsed.text.trim()) return parsed.text.trim()
+            if (parsed && parsed.text && typeof parsed.text === "string" && parsed.text.trim()) {
+                return parsed.text.trim()
+            }
         }
     } catch (e) {
-        console.warn("pdfParse v2 attempt failed:", e.message)
+        console.warn("pdf-parse PDFParse class attempt failed:", e.message)
     }
 
-    // 3. Fallback: extract plain text from buffer if library parser fails
+    // 3. Fallback: extract ASCII string content directly from PDF buffer
     try {
         const str = buffer.toString("utf8")
         const cleanText = str.replace(/[^\x20-\x7E\n\r\t]/g, " ").replace(/\s+/g, " ")
-        if (cleanText.trim().length > 20) return cleanText.substring(0, 4000)
+        if (cleanText.trim().length > 10) {
+            return cleanText.substring(0, 4000)
+        }
     } catch (e) {
         console.warn("Raw PDF buffer fallback failed:", e.message)
     }
 
-    return ""
+    return "Resume PDF uploaded."
 }
 
 /**
