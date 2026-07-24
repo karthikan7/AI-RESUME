@@ -45,7 +45,7 @@ async function generateInterViewReportController(req, res) {
             })
         }
         res.status(500).json({
-            message: "Failed to generate interview report. Please try again later."
+            message: error?.message ? `AI Error: ${error.message}` : "Failed to generate interview report. Please try again later."
         })
     }
 }

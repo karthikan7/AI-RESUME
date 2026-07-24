@@ -62,7 +62,7 @@ const interviewReportSchema = z.object({
 })
 
 async function callGeminiWithFallback(contents, schema) {
-    const models = ["gemini-3.1-flash-lite", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash", "gemini-1.5-flash-lite"]
+    const models = ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash", "gemini-1.5-flash-lite"]
     let lastError = null
     for (const model of models) {
         try {
