@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: AI-RESUME 1
+    runtime: node
+    rootDir: Backend
+    buildCommand: npm ci
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
