@@ -13,18 +13,21 @@ export const useInterview = () => {
         throw new Error("useInterview must be used within an InterviewProvider")
     }
 
-    const { loading, setLoading, report, setReport, reports, setReports } = context
+    const { loading, setLoading, report, setReport, reports, setReports, error, setError } = context
 
     const generateReport = async ({ jobDescription, selfDescription, resumeFile }) => {
         setLoading(true)
+        setError(null)
         let response = null
         try {
             response = await generateInterviewReport({ jobDescription, selfDescription, resumeFile })
             if (response?.interviewReport) {
                 setReport(response.interviewReport)
             }
-        } catch (error) {
-            console.log(error)
+        } catch (err) {
+            console.error("Error generating report:", err)
+            const msg = err.response?.data?.message || (err.response?.status === 429 ? "Rate limit reached (429). Gemini API limit exceeded, please wait 1 minute and try again." : "Failed to generate interview report.")
+            setError(msg)
         } finally {
             setLoading(false)
         }
@@ -35,14 +38,16 @@ export const useInterview = () => {
     const getReportById = async (interviewId) => {
         if (!interviewId || interviewId === "undefined") return null;
         setLoading(true)
+        setError(null)
         let response = null
         try {
             response = await getInterviewReportById(interviewId)
             if (response?.interviewReport) {
                 setReport(response.interviewReport)
             }
-        } catch (error) {
-            console.log(error)
+        } catch (err) {
+            console.error(err)
+            setError(err.response?.data?.message || "Failed to fetch report.")
         } finally {
             setLoading(false)
         }
@@ -51,14 +56,15 @@ export const useInterview = () => {
 
     const getReports = async () => {
         setLoading(true)
+        setError(null)
         let response = null
         try {
             response = await getAllInterviewReports()
             if (response?.interviewReports) {
                 setReports(response.interviewReports)
             }
-        } catch (error) {
-            console.log(error)
+        } catch (err) {
+            console.error(err)
         } finally {
             setLoading(false)
         }
@@ -69,6 +75,7 @@ export const useInterview = () => {
     const getResumePdf = async (interviewReportId) => {
         if (!interviewReportId || interviewReportId === "undefined") return;
         setLoading(true)
+        setError(null)
         let response = null
         try {
             //it will download the pdf 
@@ -82,8 +89,9 @@ export const useInterview = () => {
                 link.click()
             }
         }
-        catch (error) {
-            console.log(error)
+        catch (err) {
+            console.error(err)
+            setError(err.response?.data?.message || (err.response?.status === 429 ? "Rate limit reached (429). Please try again in 1 minute." : "Failed to generate resume PDF."))
         } finally {
             setLoading(false)
         }
@@ -97,6 +105,6 @@ export const useInterview = () => {
         }
     }, [ interviewId ])
 
-    return { loading, report, reports, generateReport, getReportById, getReports, getResumePdf }
+    return { loading, report, reports, error, setError, generateReport, getReportById, getReports, getResumePdf }
 
 }

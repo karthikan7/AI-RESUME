@@ -39,9 +39,9 @@ async function generateInterViewReportController(req, res) {
         })
     } catch (error) {
         console.error("Error in generateInterViewReportController:", error)
-        if (error.status === 429 || (error.message && error.message.includes("429"))) {
+        if (error.status === 429 || (error.message && (error.message.includes("429") || error.message.includes("RESOURCE_EXHAUSTED") || error.message.includes("quota")))) {
             return res.status(429).json({
-                message: "AI service rate limit exceeded. Please wait 1 minute and try again."
+                message: "AI service rate limit exceeded. Google Gemini API free quota limit reached. Please wait 1 minute and try again."
             })
         }
         res.status(500).json({
@@ -112,9 +112,9 @@ async function generateResumePdfController(req, res) {
         res.send(pdfBuffer)
     } catch (error) {
         console.error("Error in generateResumePdfController:", error)
-        if (error.status === 429 || (error.message && error.message.includes("429"))) {
+        if (error.status === 429 || (error.message && (error.message.includes("429") || error.message.includes("RESOURCE_EXHAUSTED") || error.message.includes("quota")))) {
             return res.status(429).json({
-                message: "AI service rate limit exceeded. Please wait 1 minute and try again."
+                message: "AI service rate limit exceeded. Google Gemini API free quota limit reached. Please wait 1 minute and try again."
             })
         }
         res.status(500).json({

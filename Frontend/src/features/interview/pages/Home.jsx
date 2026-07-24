@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router'
 
 const Home = () => {
 
-    const { loading, generateReport, reports } = useInterview()
+    const { loading, generateReport, reports, error, setError } = useInterview()
     const [ jobDescription, setJobDescription ] = useState("")
     const [ selfDescription, setSelfDescription ] = useState("")
     const resumeInputRef = useRef()
@@ -13,9 +13,11 @@ const Home = () => {
     const navigate = useNavigate()
 
     const handleGenerateReport = async () => {
-        const resumeFile = resumeInputRef.current.files[ 0 ]
+        const resumeFile = resumeInputRef.current?.files?.[ 0 ]
         const data = await generateReport({ jobDescription, selfDescription, resumeFile })
-        navigate(`/interview/${data._id}`)
+        if (data && data._id) {
+            navigate(`/interview/${data._id}`)
+        }
     }
 
     if (loading) {
@@ -29,6 +31,36 @@ const Home = () => {
 
     return (
         <div className='home-page'>
+
+            {/* Error Notification Banner */}
+            {error && (
+                <div style={{
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid #ef4444',
+                    color: '#f87171',
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    margin: '0 auto 20px auto',
+                    maxWidth: '800px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    fontSize: '0.95rem'
+                }}>
+                    <span>⚠️ {error}</span>
+                    <button 
+                        onClick={() => setError(null)}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#f87171',
+                            cursor: 'pointer',
+                            fontSize: '1.2rem',
+                            padding: '0 4px'
+                        }}
+                    >&times;</button>
+                </div>
+            )}
 
             {/* Page Header */}
             <header className='page-header'>

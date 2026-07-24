@@ -11,18 +11,24 @@ const ai = new GoogleGenAI({
 })
 
 
-// Retry wrapper with exponential backoff for Gemini API rate limit (429) errors
-async function withRetry(fn, maxRetries = 3, baseDelayMs = 2000) {
+// Retry wrapper with exponential backoff and model fallback for Gemini API rate limit (429) errors
+async function withRetry(fn, maxRetries = 4, baseDelayMs = 3000) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
             return await fn()
         } catch (err) {
-            const status = err?.status ?? err?.response?.status ?? err?.httpError?.statusCode
-            const isRateLimit = status === 429 || (err?.message && err.message.includes("429"))
+            const status = err?.status ?? err?.response?.status ?? err?.httpError?.statusCode ?? err?.code
+            const isRateLimit = status === 429 || 
+                                (err?.message && (
+                                    err.message.includes("429") || 
+                                    err.message.includes("RESOURCE_EXHAUSTED") || 
+                                    err.message.includes("quota") ||
+                                    err.message.includes("Too Many Requests")
+                                ))
 
             if (isRateLimit && attempt < maxRetries) {
-                const delay = baseDelayMs * Math.pow(2, attempt - 1) // 2s, 4s, 8s
-                console.warn(`Gemini rate limit hit. Retrying in ${delay / 1000}s... (attempt ${attempt}/${maxRetries})`)
+                const delay = baseDelayMs * Math.pow(2, attempt - 1) + Math.floor(Math.random() * 1000) // 3s, 7s, 15s...
+                console.warn(`Gemini rate limit hit (429). Retrying in ${(delay / 1000).toFixed(1)}s... (attempt ${attempt}/${maxRetries})`)
                 await new Promise(resolve => setTimeout(resolve, delay))
             } else {
                 throw err
@@ -30,7 +36,6 @@ async function withRetry(fn, maxRetries = 3, baseDelayMs = 2000) {
         }
     }
 }
-
 
 const interviewReportSchema = z.object({
     matchScore: z.number().describe("A score between 0 and 100 indicating how well the candidate's profile matches the job describe"),
@@ -56,8 +61,28 @@ const interviewReportSchema = z.object({
     title: z.string().describe("The title of the job for which the interview report is generated"),
 })
 
-async function generateInterviewReport({ resume, selfDescription, jobDescription }) {
+async function callGeminiWithFallback(contents, schema) {
+    const models = ["gemini-3.1-flash-lite", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash", "gemini-1.5-flash-lite"]
+    let lastError = null
+    for (const model of models) {
+        try {
+            return await withRetry(() => ai.models.generateContent({
+                model,
+                contents,
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: zodToJsonSchema(schema),
+                }
+            }))
+        } catch (err) {
+            lastError = err
+            console.warn(`Model ${model} failed: ${err.message}. Trying next fallback model if available...`)
+        }
+    }
+    throw lastError
+}
 
+async function generateInterviewReport({ resume, selfDescription, jobDescription }) {
 
     const prompt = `Generate an interview report for a candidate with the following details:
                         Resume: ${resume}
@@ -65,27 +90,34 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
                         Job Description: ${jobDescription}
 `
 
-    const response = await withRetry(() => ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: zodToJsonSchema(interviewReportSchema),//output should be in zod structure
-        }
-    }))
-
+    const response = await callGeminiWithFallback(prompt, interviewReportSchema)
     return JSON.parse(response.text)
-
-
 }
 
 
 async function generatePdfFromHtml(htmlContent) {
-    const browser = await puppeteer.launch({
-        args: chromium.args,
-        executablePath: await chromium.executablePath(),
-        headless: chromium.headless,
-    })
+    let browser
+    try {
+        const executablePath = await chromium.executablePath()
+        if (executablePath) {
+            browser = await puppeteer.launch({
+                args: chromium.args,
+                executablePath,
+                headless: chromium.headless,
+            })
+        }
+    } catch (e) {
+        console.warn("Chromium executable path failed, using local browser fallback...")
+    }
+
+    if (!browser) {
+        try {
+            browser = await puppeteer.launch({ headless: true, channel: "chrome" })
+        } catch (e) {
+            browser = await puppeteer.launch({ headless: true, channel: "msedge" })
+        }
+    }
+
     const page = await browser.newPage();
     await page.setContent(htmlContent, { waitUntil: "networkidle0" })
 
@@ -121,15 +153,7 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) { 
                         The resume should not be so lengthy, it should ideally be 1-2 pages long when converted to PDF. Focus on quality rather than quantity and make sure to include all the relevant information that can increase the candidate's chances of getting an interview call for the given job description.
                     `
 
-    const response = await withRetry(() => ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",//response should be in json
-            responseSchema: zodToJsonSchema(resumePdfSchema),//ans should be in html schema 
-        }
-    }))
-
+    const response = await callGeminiWithFallback(prompt, resumePdfSchema)
 
     const jsonContent = JSON.parse(response.text)
 
