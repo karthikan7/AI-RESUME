@@ -1,4 +1,4 @@
-const { PDFParse, VerbosityLevel } = require("pdf-parse")
+const pdfParse = require("pdf-parse")
 const { generateInterviewReport, generateResumePdf } = require("../services/ai.service")
 const interviewReportModel = require("../models/interviewReport.model")
 
@@ -12,10 +12,8 @@ async function generateInterViewReportController(req, res) {
     try {
         let resumeText = ""
         if (req.file && req.file.buffer) {
-            const parser = new PDFParse({ data: req.file.buffer })
-            await parser.load()
-            const parsed = await parser.getText()
-            resumeText = parsed?.text || ""
+            const parsed = await pdfParse(req.file.buffer)
+            resumeText = parsed.text || ""
         }
 
         const { selfDescription, jobDescription } = req.body
