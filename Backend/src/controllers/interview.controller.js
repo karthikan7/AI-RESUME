@@ -18,6 +18,12 @@ async function generateInterViewReportController(req, res) {
 
         const { selfDescription, jobDescription } = req.body
 
+        if (!jobDescription || (!resumeText && !selfDescription)) {
+            return res.status(400).json({
+                message: "Please provide a Target Job Description AND either upload a Resume or write a Self Description."
+            })
+        }
+
         //call the ai service 
         const interViewReportByAi = await generateInterviewReport({
             resume: resumeText,

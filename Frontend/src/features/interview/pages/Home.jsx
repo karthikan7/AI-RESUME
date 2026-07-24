@@ -14,6 +14,14 @@ const Home = () => {
 
     const handleGenerateReport = async () => {
         const resumeFile = resumeInputRef.current?.files?.[ 0 ]
+        if (!jobDescription || (!jobDescription.trim())) {
+            setError("Please paste the Target Job Description before generating.")
+            return
+        }
+        if (!resumeFile && (!selfDescription || !selfDescription.trim())) {
+            setError("Please upload a Resume or enter a Quick Self-Description.")
+            return
+        }
         const data = await generateReport({ jobDescription, selfDescription, resumeFile })
         if (data && data._id) {
             navigate(`/interview/${data._id}`)
