@@ -12,8 +12,8 @@ async function generateInterViewReportController(req, res) {
     try {
         let resumeText = ""
         if (req.file && req.file.buffer) {
-            const parser = new PDFParse({ verbosity: VerbosityLevel.ERRORS })
-            await parser.load(req.file.buffer)
+            const parser = new PDFParse({ verbosity: VerbosityLevel.ERRORS, data: new Uint8Array(req.file.buffer) })
+            await parser.load()
             resumeText = await parser.getText() || ""
         }
 
