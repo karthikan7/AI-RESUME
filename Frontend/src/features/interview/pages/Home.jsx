@@ -2,19 +2,25 @@ import React, { useState, useRef } from 'react'
 import "../style/home.scss"
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
+import { useAuth } from '../../auth/hooks/useAuth.js'
+import { 
+    Sparkles, Briefcase, User, FileText, UploadCloud, 
+    ArrowRight, LogOut, AlertTriangle, X, Clock, Bot, Zap, CheckCircle2, ChevronRight
+} from 'lucide-react'
 
 const Home = () => {
-
     const { loading, generateReport, reports, error, setError } = useInterview()
-    const [ jobDescription, setJobDescription ] = useState("")
-    const [ selfDescription, setSelfDescription ] = useState("")
+    const { user, handleLogout } = useAuth()
+    const [jobDescription, setJobDescription] = useState("")
+    const [selfDescription, setSelfDescription] = useState("")
+    const [fileName, setFileName] = useState(null)
+    const [isDragOver, setIsDragOver] = useState(false)
     const resumeInputRef = useRef()
-
     const navigate = useNavigate()
 
     const handleGenerateReport = async () => {
-        const resumeFile = resumeInputRef.current?.files?.[ 0 ]
-        if (!jobDescription || (!jobDescription.trim())) {
+        const resumeFile = resumeInputRef.current?.files?.[0]
+        if (!jobDescription || !jobDescription.trim()) {
             setError("Please paste the Target Job Description before generating.")
             return
         }
@@ -28,163 +34,234 @@ const Home = () => {
         }
     }
 
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0]
+        setFileName(file ? file.name : null)
+    }
+
+    const handleDrop = (e) => {
+        e.preventDefault()
+        setIsDragOver(false)
+        const file = e.dataTransfer.files?.[0]
+        if (file) {
+            const dt = new DataTransfer()
+            dt.items.add(file)
+            resumeInputRef.current.files = dt.files
+            setFileName(file.name)
+        }
+    }
+
     if (loading) {
         return (
-            <main className='loading-screen'>
-                <div className='spinner' />
-                <h1>Loading your interview plan...</h1>
-            </main>
+            <div className='loading-screen'>
+                <div className='loading-pulse-wrapper'>
+                    <div className='loading-glow' />
+                    <div className='spinner' />
+                </div>
+                <p className='loading-text'>Generating your personalized interview plan...</p>
+                <p className='loading-sub'><Bot size={16} /> Analyzing skill match & crafting questions (~30s)</p>
+            </div>
         )
     }
 
     return (
         <div className='home-page'>
+            {/* Background Orbs */}
+            <div className='bg-orb bg-orb--1' />
+            <div className='bg-orb bg-orb--2' />
+            <div className='bg-orb bg-orb--3' />
 
-            {/* Error Notification Banner */}
+            {/* Navbar */}
+            <nav className='home-nav'>
+                <div className='home-nav__brand'>
+                    <div className='logo-box'>
+                        <Sparkles size={20} />
+                    </div>
+                    <span className='home-nav__name'>PrepAI</span>
+                </div>
+                <div className='home-nav__right'>
+                    {user?.username && (
+                        <div className='home-nav__user'>
+                            <User size={14} />
+                            <span>{user.username}</span>
+                        </div>
+                    )}
+                    <button className='home-nav__logout' onClick={handleLogout}>
+                        <LogOut size={14} />
+                        <span>Sign Out</span>
+                    </button>
+                </div>
+            </nav>
+
+            {/* Error Banner */}
             {error && (
-                <div style={{
-                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                    border: '1px solid #ef4444',
-                    color: '#f87171',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    margin: '0 auto 20px auto',
-                    maxWidth: '800px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    fontSize: '0.95rem'
-                }}>
-                    <span>⚠️ {error}</span>
-                    <button 
-                        onClick={() => setError(null)}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#f87171',
-                            cursor: 'pointer',
-                            fontSize: '1.2rem',
-                            padding: '0 4px'
-                        }}
-                    >&times;</button>
+                <div className='error-banner'>
+                    <div className='error-banner__content'>
+                        <AlertTriangle size={18} />
+                        <span>{error}</span>
+                    </div>
+                    <button className='error-banner__close' onClick={() => setError(null)}>
+                        <X size={18} />
+                    </button>
                 </div>
             )}
 
-            {/* Page Header */}
-            <header className='page-header'>
-                <h1>Create Your Custom <span className='highlight'>Interview Plan</span></h1>
-                <p>Let our AI analyze the job requirements and your unique profile to build a winning strategy.</p>
+            {/* Hero */}
+            <header className='hero'>
+                <div className='hero__badge'>
+                    <Zap size={14} /> AI-Powered Interview Coach & Resume Sync
+                </div>
+                <h1 className='hero__title'>
+                    Ace Your Next<br />
+                    <span className='hero__gradient'>Dream Interview</span>
+                </h1>
+                <p className='hero__sub'>
+                    Paste a job description, upload your resume, and let AI generate a customized 
+                    preparation strategy — technical questions, behavioral insights, and a step-by-step roadmap.
+                </p>
             </header>
 
-            {/* Main Card */}
-            <div className='interview-card'>
-                <div className='interview-card__body'>
+            {/* Generator Card */}
+            <div className='gen-card'>
+                <div className='gen-card__body'>
 
-                    {/* Left Panel - Job Description */}
-                    <div className='panel panel--left'>
-                        <div className='panel__header'>
-                            <span className='panel__icon'>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
-                            </span>
+                    {/* Left Panel — Job Description */}
+                    <div className='gen-panel'>
+                        <div className='gen-panel__header'>
+                            <div className='gen-panel__icon'>
+                                <Briefcase size={18} />
+                            </div>
                             <h2>Target Job Description</h2>
                             <span className='badge badge--required'>Required</span>
                         </div>
                         <textarea
-                            onChange={(e) => { setJobDescription(e.target.value) }}
-                            className='panel__textarea'
-                            placeholder={`Paste the full job description here...\ne.g. 'Senior Frontend Engineer at Google requires proficiency in React, TypeScript, and large-scale system design...'`}
+                            className='gen-textarea'
+                            placeholder='Paste the full job description here (responsibilities, required skills, qualifications)...'
                             maxLength={5000}
+                            value={jobDescription}
+                            onChange={(e) => setJobDescription(e.target.value)}
                         />
-                        <div className='char-counter'>0 / 5000 chars</div>
+                        <div className='char-counter'>{jobDescription.length.toLocaleString()} / 5,000</div>
                     </div>
 
-                    {/* Vertical Divider */}
-                    <div className='panel-divider' />
+                    <div className='gen-divider' />
 
-                    {/* Right Panel - Profile */}
-                    <div className='panel panel--right'>
-                        <div className='panel__header'>
-                            <span className='panel__icon'>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                            </span>
-                            <h2>Your Profile</h2>
+                    {/* Right Panel — Profile / Resume */}
+                    <div className='gen-panel'>
+                        <div className='gen-panel__header'>
+                            <div className='gen-panel__icon'>
+                                <User size={18} />
+                            </div>
+                            <h2>Your Candidate Profile</h2>
                         </div>
 
-                        {/* Upload Resume */}
-                        <div className='upload-section'>
-                            <label className='section-label'>
-                                Upload Resume
-                                <span className='badge badge--best'>Best Results</span>
-                            </label>
-                            <label className='dropzone' htmlFor='resume'>
-                                <span className='dropzone__icon'>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" /><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" /></svg>
-                                </span>
-                                <p className='dropzone__title'>Click to upload or drag &amp; drop</p>
-                                <p className='dropzone__subtitle'>PDF or DOCX (Max 5MB)</p>
-                                <input ref={resumeInputRef} hidden type='file' id='resume' name='resume' accept='.pdf,.docx' />
+                        {/* Resume Upload */}
+                        <div className='upload-zone-wrap'>
+                            <div className='upload-label'>
+                                <span>Upload Resume</span>
+                                <span className='badge badge--best'>Recommended</span>
+                            </div>
+                            <label
+                                className={`upload-zone ${isDragOver ? 'upload-zone--drag' : ''} ${fileName ? 'upload-zone--filled' : ''}`}
+                                htmlFor='resume'
+                                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }}
+                                onDragLeave={() => setIsDragOver(false)}
+                                onDrop={handleDrop}
+                            >
+                                {fileName ? (
+                                    <>
+                                        <CheckCircle2 size={28} className='upload-zone__icon' color='#34d399' />
+                                        <p className='upload-zone__filename'>
+                                            <FileText size={16} /> {fileName}
+                                        </p>
+                                        <p className='upload-zone__hint'>Click to change file</p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <UploadCloud size={32} className='upload-zone__icon' />
+                                        <p className='upload-zone__title'>Click to upload or drag & drop</p>
+                                        <p className='upload-zone__hint'>PDF files supported · Max 5MB</p>
+                                    </>
+                                )}
+                                <input
+                                    ref={resumeInputRef}
+                                    hidden
+                                    type='file'
+                                    id='resume'
+                                    name='resume'
+                                    accept='.pdf'
+                                    onChange={handleFileChange}
+                                />
                             </label>
                         </div>
 
-                        {/* OR Divider */}
                         <div className='or-divider'><span>OR</span></div>
 
-                        {/* Quick Self-Description */}
-                        <div className='self-description'>
-                            <label className='section-label' htmlFor='selfDescription'>Quick Self-Description</label>
+                        <div className='self-desc-wrap'>
+                            <label className='upload-label' htmlFor='selfDescription'>
+                                Quick Self-Description
+                            </label>
                             <textarea
-                                onChange={(e) => { setSelfDescription(e.target.value) }}
                                 id='selfDescription'
-                                name='selfDescription'
-                                className='panel__textarea panel__textarea--short'
-                                placeholder="Briefly describe your experience, key skills, and years of experience if you don't have a resume handy..."
+                                className='gen-textarea gen-textarea--short'
+                                placeholder='Briefly summarize your role, key skills, tech stack, and experience...'
+                                value={selfDescription}
+                                onChange={(e) => setSelfDescription(e.target.value)}
                             />
-                        </div>
-
-                        {/* Info Box */}
-                        <div className='info-box'>
-                            <span className='info-box__icon'>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" stroke="#1a1f27" strokeWidth="2" /><line x1="12" y1="16" x2="12.01" y2="16" stroke="#1a1f27" strokeWidth="2" /></svg>
-                            </span>
-                            <p>Either a <strong>Resume</strong> or a <strong>Self Description</strong> is required to generate a personalized plan.</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Card Footer */}
-                <div className='interview-card__footer'>
-                    <span className='footer-info'>AI-Powered Strategy Generation &bull; Approx 30s</span>
-                    <button
-                        onClick={handleGenerateReport}
-                        className='generate-btn'>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" /></svg>
-                        Generate My Interview Strategy
+                {/* Footer */}
+                <div className='gen-card__footer'>
+                    <span className='gen-footer__info'>
+                        <Bot size={16} /> Powered by Gemini AI Engine · ~30 seconds processing
+                    </span>
+                    <button className='gen-btn' onClick={handleGenerateReport} id='generate-report-btn'>
+                        <span>Generate Strategy</span>
+                        <ArrowRight size={18} />
                     </button>
                 </div>
             </div>
 
-            {/* Recent Reports List */}
+            {/* Recent Reports */}
             {reports.length > 0 && (
-                <section className='recent-reports'>
-                    <h2>My Recent Interview Plans</h2>
-                    <ul className='reports-list'>
+                <section className='recent-section'>
+                    <div className='recent-section__header'>
+                        <h2>Recent Interview Plans</h2>
+                        <span className='recent-section__count'>
+                            {reports.length} report{reports.length !== 1 ? 's' : ''}
+                        </span>
+                    </div>
+                    <div className='reports-grid'>
                         {reports.map(report => (
-                            <li key={report._id} className='report-item' onClick={() => navigate(`/interview/${report._id}`)}>
-                                <h3>{report.title || 'Untitled Position'}</h3>
-                                <p className='report-meta'>Generated on {new Date(report.createdAt).toLocaleDateString()}</p>
-                                <p className={`match-score ${report.matchScore >= 80 ? 'score--high' : report.matchScore >= 60 ? 'score--mid' : 'score--low'}`}>Match Score: {report.matchScore}%</p>
-                            </li>
+                            <div
+                                key={report._id}
+                                className='report-card'
+                                onClick={() => navigate(`/interview/${report._id}`)}
+                            >
+                                <div className='report-card__top'>
+                                    <h3 className='report-card__title'>
+                                        {report.title || 'Untitled Position'}
+                                    </h3>
+                                    <span className={`report-card__score ${report.matchScore >= 80 ? 'score--high' : report.matchScore >= 60 ? 'score--mid' : 'score--low'}`}>
+                                        {report.matchScore}% match
+                                    </span>
+                                </div>
+                                <p className='report-card__date'>
+                                    <Clock size={13} />
+                                    {new Date(report.createdAt).toLocaleDateString('en-US', {
+                                        month: 'short', day: 'numeric', year: 'numeric'
+                                    })}
+                                </p>
+                                <div className='report-card__arrow'>
+                                    <ChevronRight size={18} />
+                                </div>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 </section>
             )}
-
-            {/* Page Footer */}
-            <footer className='page-footer'>
-                <a href='#'>Privacy Policy</a>
-                <a href='#'>Terms of Service</a>
-                <a href='#'>Help Center</a>
-            </footer>
         </div>
     )
 }
