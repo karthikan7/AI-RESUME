@@ -62,7 +62,43 @@ graph TD;
 
 ---
 
-## 💻 How to Run Locally
+## 🌐 Live Demo
+
+> **Try it live** → [https://ai-resume-1-v6jj.onrender.com](https://ai-resume-1-v6jj.onrender.com)
+
+> ⚠️ The backend runs on Render's free tier — it may take **20–30 seconds to wake up** on the first request. Please be patient!
+
+---
+
+## 🎮 How to Use the App
+
+**Step 1 — Create an Account**
+Head to the live link above and click **"Create one free"** to register. A username, email, and password are all you need.
+
+**Step 2 — Paste the Job Description**
+On the dashboard, paste the full job description of the role you are targeting into the left panel. The more detailed it is, the better PrepAI's analysis will be.
+
+**Step 3 — Add Your Profile**
+In the right panel, either:
+- **Upload your resume** as a PDF (drag & drop or click to upload), or
+- **Type a quick self-description** summarizing your experience, skills, and background.
+
+**Step 4 — Generate Your Strategy**
+Click the **"Generate Strategy"** button. Gemini AI will analyze the inputs and generate a complete, personalized interview strategy in approximately 30 seconds.
+
+**Step 5 — Explore Your Interview Plan**
+Your strategy dashboard will include:
+- 📊 **Match Score** — A percentage showing how well your profile fits the role.
+- ⚙️ **Technical Questions** — Role-specific questions with Interviewer Intent and a Model Answer Strategy.
+- 🧠 **Behavioral Questions** — STAR-method scenario questions with structured answer guidance.
+- 🗺️ **Prep Roadmap** — A day-by-day, actionable preparation schedule.
+
+**Step 6 — Download Your Tailored Resume**
+Click the **"Tailored Resume"** button to download an ATS-optimized PDF resume that has been automatically rewritten to align your experience with the target job's keywords and requirements.
+
+---
+
+## 💻 Run Locally
 
 ### Prerequisites
 - Node.js (v18+)
@@ -81,7 +117,7 @@ graph TD;
    cd Backend
    npm install
    \`\`\`
-   - Create a \`.env\` file in the \`Backend\` directory and add your API key:
+   - Create a \`.env\` file in the \`Backend\` directory:
      \`\`\`env
      GOOGLE_GENAI_API_KEY=your_gemini_api_key_here
      \`\`\`
@@ -91,15 +127,13 @@ graph TD;
      \`\`\`
 
 3. **Setup the Frontend:**
-   Open a new terminal and navigate to the Frontend directory:
    \`\`\`bash
    cd Frontend
    npm install
    npm run dev
    \`\`\`
 
-4. **Access the App:**
-   Open your browser and navigate to \`http://localhost:5173\`.
+4. Open \`http://localhost:5173\` in your browser.
 
 ---
 
