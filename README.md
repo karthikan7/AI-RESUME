@@ -1,13 +1,15 @@
 # PrepAI - AI-Powered Interview Strategy & Resume Optimizer ✨
 
-![PrepAI Banner](https://img.shields.io/badge/PrepAI-AI%20Interview%20Coach-8b5cf6?style=for-the-badge&logo=google-gemini)
-![Gemini AI](https://img.shields.io/badge/Powered%20by-Gemini%20AI-06b6d4?style=for-the-badge&logo=google-gemini)
-![React](https://img.shields.io/badge/Frontend-React-61DAFB?style=for-the-badge&logo=react)
-![Express](https://img.shields.io/badge/Backend-Express.js-000000?style=for-the-badge&logo=express)
+<div align="center">
+  <img src="https://img.shields.io/badge/PrepAI-AI%20Interview%20Coach-8b5cf6?style=for-the-badge&logo=google-gemini" alt="PrepAI Banner" />
+  <img src="https://img.shields.io/badge/Powered%20by-Gemini%20AI-06b6d4?style=for-the-badge&logo=google-gemini" alt="Gemini AI" />
+  <img src="https://img.shields.io/badge/Frontend-React-61DAFB?style=for-the-badge&logo=react" alt="React" />
+  <img src="https://img.shields.io/badge/Backend-Express.js-000000?style=for-the-badge&logo=express" alt="Express" />
+</div>
 
-**PrepAI** is a comprehensive, functional Generative AI application that solves a highly critical real-world problem: helping candidates bridge the gap between their current experience and their dream jobs. By analyzing a candidate's resume and a target job description, PrepAI generates a highly personalized interview preparation strategy.
+<br />
 
-This project was built for the **GenForge - Mini Challenge (CodeFury 9.0)**.
+**PrepAI** is a comprehensive, functional Generative AI application built for the **GenForge - Mini Challenge (CodeFury 9.0)**. It solves a highly critical real-world problem: helping candidates bridge the gap between their current experience and their dream jobs by analyzing their resume against a target job description to generate a highly personalized, actionable interview preparation strategy.
 
 ---
 
@@ -18,28 +20,45 @@ Job seekers often struggle to identify exactly what skills they lack for a speci
 **PrepAI** leverages the **Google Gemini API** to act as a Principal Recruiter and Elite Engineering Manager, providing candidates with:
 1. **Mathematical Match Scoring**: An honest evaluation of how well their profile aligns with the role.
 2. **Tailored Technical & Behavioral Q&A**: High-signal interview questions crafted specifically around the overlap (and gaps) between the candidate's resume and the job description, complete with Interviewer Intent and Model Answers.
-3. **Actionable Day-by-Day Roadmap**: A concrete, focused preparation schedule.
-4. **ATS-Optimized Resume Generation**: A dynamically generated, perfectly formatted PDF resume that refactors the candidate's experience to highlight keywords and metrics relevant to the target job.
+3. **Actionable Day-by-Day Roadmap**: A concrete, focused preparation schedule spanning several days.
+4. **ATS-Optimized Resume Generation**: A dynamically generated, perfectly formatted HTML/PDF resume that refactors the candidate's experience to highlight keywords and metrics relevant to the target job.
 
 ---
 
-## 🛠️ Tech Stack
+## 🌟 Core Value Proposition
 
-- **Frontend**: React.js, Vite, SCSS (Obsidian Dark Glassmorphism UI), Lucide Icons
-- **Backend**: Node.js, Express.js
-- **Generative AI**: Google Gemini API (gemini-1.5-flash / gemini-2.0-flash)
-- **PDF Generation**: Puppeteer / Chromium
-- **Database / Auth**: Context API (Client-side simulation/JWT structure)
+- **Not Just a Chatbot**: PrepAI forces the Generative AI to output strictly structured, multi-layered JSON data using Zod schemas, converting unstructured text into a fully interactive dashboard.
+- **Deep Personalization**: Questions aren't generic (e.g., "What is React?"). They are hyper-specific to the intersection of the candidate's actual experience and the company's tech stack.
+- **End-to-End Workflow**: It guides a user from the initial job application (Resume Generation) straight through to the final interview stage (Q&A and Prep Roadmap).
 
 ---
 
-## 🌟 Key Features
+## 🏗️ System Architecture & Workflow
 
-*   **Obsidian Glassmorphism Dashboard**: A world-class, premium UI featuring smooth micro-interactions, responsive layouts, and beautiful radial glowing background orbs.
-*   **Dual-Panel Generator**: Easily paste target job descriptions and drag-and-drop resume PDFs for instant analysis.
-*   **Smart Question Accordions**: Interactive technical and behavioral questions featuring "One-Click Copy Answer" functionality.
-*   **Skill Gap Analysis**: Severity-based skill gap identification (High/Medium/Low).
-*   **Dynamic Resume PDF Generation**: Generates an ATS-friendly, highly tailored HTML resume under the hood and converts it to a downloadable PDF.
+```mermaid
+graph TD;
+    A[User Inputs: Resume PDF + Job Description] -->|Frontend React App| B(Express.js Backend);
+    B -->|Constructs Elite Persona Prompts| C{Google Gemini API};
+    C -->|Returns Zod-Validated JSON| B;
+    B -->|Returns JSON Strategy| D[Dashboard UI Rendering];
+    B -->|Generates Styled HTML| E(Puppeteer Headless Browser);
+    E -->|Converts HTML to PDF| F[ATS-Friendly Tailored Resume Download];
+```
+
+---
+
+## 🛠️ Tech Stack & Implementation Details
+
+### Frontend (Client)
+- **Framework**: React.js with Vite for lightning-fast HMR and optimized builds.
+- **Styling**: SCSS implementing a world-class **Obsidian Dark Glassmorphism UI**. Features include ambient glowing radial orbs, frosted glass cards, shimmer loading states, and custom scrollbars.
+- **Icons**: Lucide-React for clean, modern SVG iconography.
+
+### Backend (Server)
+- **Environment**: Node.js & Express.js.
+- **Generative AI Core**: `@google/genai` SDK using `gemini-1.5-flash` and `gemini-2.0-flash` for high-speed, cost-effective reasoning.
+- **Schema Validation**: `zod` and `zod-to-json-schema` to enforce strict JSON structures from the LLM.
+- **PDF Generation**: `puppeteer-core` and `@sparticuz/chromium` to dynamically render AI-generated CSS/HTML into a flawless, downloadable A4 PDF resume.
 
 ---
 
@@ -84,9 +103,12 @@ Job seekers often struggle to identify exactly what skills they lack for a speci
 
 ---
 
-## 💡 Why this fits GenForge
-
-This project goes beyond a simple chatbot wrapper. It uses structured output parsing (Zod schemas) to force the Generative AI to return complex, multi-layered JSON data. It perfectly blends a polished Frontend user experience with complex AI orchestration on the Backend to solve a high-impact, real-world challenge.
+## 🔮 Future Scope
+- **Audio Mock Interviews**: Integrating Web Speech API to let users practice the generated questions verbally against an AI voice avatar.
+- **LinkedIn Integration**: Directly importing candidate profiles via OAuth to bypass manual resume uploads.
+- **Analytics Dashboard**: Tracking match score improvements over time as candidates complete their preparation roadmaps.
 
 ---
-*Built with ❤️ for GenForge 2026*
+<div align="center">
+  <i>Built with ❤️ for GenForge - IEEE UVCE CodeFury 9.0 (2026)</i>
+</div>
