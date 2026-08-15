@@ -104,8 +104,7 @@ const Interview = () => {
             <div className='bg-orb bg-orb--1' />
             <div className='bg-orb bg-orb--2' />
 
-            {/* Top Bar */}
-            <div className='interview-topbar'>
+                        <div className='interview-topbar'>
                 <button className='back-btn' onClick={() => navigate('/')}>
                     <ArrowLeft size={16} />
                     <span>Dashboard</span>
@@ -126,11 +125,9 @@ const Interview = () => {
 
             <div className='interview-layout'>
 
-                {/* Left Navigation */}
-                <nav className='interview-nav'>
+                                <nav className='interview-nav'>
 
-                    {/* Match Score Ring */}
-                    <div className='interview-nav__score'>
+                                        <div className='interview-nav__score'>
                         <p className='score-label'>Match Score</p>
                         <div className={`score-ring score-ring--${scoreColor}`}>
                             <svg viewBox="0 0 100 100">
@@ -161,8 +158,7 @@ const Interview = () => {
                         </p>
                     </div>
 
-                    {/* Nav Items */}
-                    <div className='interview-nav__items'>
+                                        <div className='interview-nav__items'>
                         {NAV_ITEMS.map(item => (
                             <button
                                 key={item.id}
@@ -176,8 +172,7 @@ const Interview = () => {
                     </div>
                 </nav>
 
-                {/* Center Content */}
-                <main className='interview-content'>
+                                <main className='interview-content'>
 
                     {activeNav === 'technical' && (
                         <section>
@@ -222,8 +217,7 @@ const Interview = () => {
                     )}
                 </main>
 
-                {/* Right Sidebar */}
-                <aside className='interview-sidebar'>
+                                <aside className='interview-sidebar'>
                     <div className='sidebar-section'>
                         <h3 className='sidebar-title'>Identified Skill Gaps</h3>
                         <div className='skill-gaps'>

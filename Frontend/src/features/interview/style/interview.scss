@@ -9,7 +9,6 @@
     background-size: 28px 28px;
 }
 
-/* Topbar */
 .interview-topbar {
     position: sticky;
     top: 0;
@@ -91,7 +90,6 @@
     }
 }
 
-/* Layout */
 .interview-layout {
     max-width: 1350px;
     margin: 0 auto;
@@ -120,7 +118,6 @@
     }
 }
 
-/* Left Navigation */
 .interview-nav {
     display: flex;
     flex-direction: column;
@@ -160,7 +157,6 @@
     }
 }
 
-/* Score Ring */
 .score-ring {
     width: 110px;
     height: 110px;
@@ -230,7 +226,6 @@
     }
 }
 
-/* Main Content Area */
 .interview-content {
     display: flex;
     flex-direction: column;
@@ -267,7 +262,6 @@
     gap: 1rem;
 }
 
-/* Question Cards */
 .q-card {
     background: var(--bg-surface);
     backdrop-filter: var(--backdrop-blur);
@@ -404,7 +398,6 @@
     }
 }
 
-/* Preparation Roadmap Timeline */
 .roadmap-list {
     display: flex;
     flex-direction: column;
@@ -486,7 +479,6 @@
     }
 }
 
-/* Sidebar Right */
 .interview-sidebar {
     display: flex;
     flex-direction: column;

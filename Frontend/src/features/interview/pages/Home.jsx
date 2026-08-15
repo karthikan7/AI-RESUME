@@ -66,13 +66,11 @@ const Home = () => {
 
     return (
         <div className='home-page'>
-            {/* Background Orbs */}
-            <div className='bg-orb bg-orb--1' />
+                        <div className='bg-orb bg-orb--1' />
             <div className='bg-orb bg-orb--2' />
             <div className='bg-orb bg-orb--3' />
 
-            {/* Navbar */}
-            <nav className='home-nav'>
+                        <nav className='home-nav'>
                 <div className='home-nav__brand'>
                     <div className='logo-box'>
                         <Sparkles size={20} />
@@ -93,8 +91,7 @@ const Home = () => {
                 </div>
             </nav>
 
-            {/* Error Banner */}
-            {error && (
+                        {error && (
                 <div className='error-banner'>
                     <div className='error-banner__content'>
                         <AlertTriangle size={18} />
@@ -106,8 +103,7 @@ const Home = () => {
                 </div>
             )}
 
-            {/* Hero */}
-            <header className='hero'>
+                        <header className='hero'>
                 <div className='hero__badge'>
                     <Zap size={14} /> AI-Powered Interview Coach & Resume Sync
                 </div>
@@ -121,12 +117,10 @@ const Home = () => {
                 </p>
             </header>
 
-            {/* Generator Card */}
-            <div className='gen-card'>
+                        <div className='gen-card'>
                 <div className='gen-card__body'>
 
-                    {/* Left Panel — Job Description */}
-                    <div className='gen-panel'>
+                                        <div className='gen-panel'>
                         <div className='gen-panel__header'>
                             <div className='gen-panel__icon'>
                                 <Briefcase size={18} />
@@ -146,8 +140,7 @@ const Home = () => {
 
                     <div className='gen-divider' />
 
-                    {/* Right Panel — Profile / Resume */}
-                    <div className='gen-panel'>
+                                        <div className='gen-panel'>
                         <div className='gen-panel__header'>
                             <div className='gen-panel__icon'>
                                 <User size={18} />
@@ -155,8 +148,7 @@ const Home = () => {
                             <h2>Your Candidate Profile</h2>
                         </div>
 
-                        {/* Resume Upload */}
-                        <div className='upload-zone-wrap'>
+                                                <div className='upload-zone-wrap'>
                             <div className='upload-label'>
                                 <span>Upload Resume</span>
                                 <span className='badge badge--best'>Recommended</span>
@@ -212,8 +204,7 @@ const Home = () => {
                     </div>
                 </div>
 
-                {/* Footer */}
-                <div className='gen-card__footer'>
+                                <div className='gen-card__footer'>
                     <span className='gen-footer__info'>
                         <Bot size={16} /> Powered by Gemini AI Engine · ~30 seconds processing
                     </span>
@@ -224,8 +215,7 @@ const Home = () => {
                 </div>
             </div>
 
-            {/* Recent Reports */}
-            {reports.length > 0 && (
+                        {reports.length > 0 && (
                 <section className='recent-section'>
                     <div className='recent-section__header'>
                         <h2>Recent Interview Plans</h2>
