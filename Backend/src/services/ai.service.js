@@ -84,31 +84,10 @@ async function callGeminiWithFallback(contents, schema) {
 
 async function generateInterviewReport({ resume, selfDescription, jobDescription }) {
 
-    const prompt = `You are a Principal Recruiter and Elite Engineering Manager at a top-tier tech firm. 
-Analyze the candidate's details (Resume and Self-Description) against the target Job Description to generate a highly detailed and hyper-tailored Interview Strategy & Preparation Report.
-
-Candidate Data:
-- Resume Content: ${resume || 'None provided'}
-- Self-Description: ${selfDescription || 'None provided'}
-
-Target Role Profile:
-- Job Description: ${jobDescription}
-
-INSTRUCTIONS:
-1. Match Score:
-   - Provide an honest, mathematically rigorous score (0 to 100) based on tech stack alignment, experience level, seniority (e.g., junior vs. senior/lead), and core qualifications.
-2. Technical Questions:
-   - Craft 5 to 7 high-signal, non-generic technical questions that match the specific skills required. Include a mix of architectural design, system optimization, coding strategies, and framework-specific nuances.
-   - For each question:
-     - Intention: Explain exactly what deep competency or engineering principle is being tested (e.g., state-management efficiency, memory overhead, database indexing choice).
-     - Answer: Provide a comprehensive, structured response model featuring industry-standard best practices, concrete architectural principles, or code snippets to demonstrate peak seniority.
-3. Behavioral Questions:
-   - Craft 3 to 5 realistic behavioral questions designed using the STAR model, focused on real-world engineering team dynamics, technical debt resolution, cross-functional collaboration, or post-mortem learnings relevant to the target role.
-4. Skill Gaps:
-   - Identify specific key technologies, methodologies (e.g., CI/CD, unit testing), or domain expertise requested in the Job Description but weak/missing in the candidate's profile. Assign a clear severity (low, medium, high).
-5. Day-wise Roadmap:
-   - Produce a customized, day-by-day (e.g., 5 to 7 days) preparation schedule.
-   - For each day, define a clear focus and highly actionable, concrete tasks (e.g., "Implement a mock LRU Cache", "Review React 19 concurrent features", "Solve 3 SQL problems on Window functions") rather than generic tips like "study databases".
+    const prompt = `Generate an interview report for a candidate with the following details:
+                        Resume: ${resume}
+                        Self Description: ${selfDescription}
+                        Job Description: ${jobDescription}
 `
 
     const response = await callGeminiWithFallback(prompt, interviewReportSchema)
@@ -158,115 +137,21 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) { 
     // have to generate html from ai then pappet convert html to pdf then we will send that resumme 
 
     const resumePdfSchema = z.object({
-        html: z.string().describe("The styled HTML content of the resume, suitable for PDF rendering via puppeteer.")
+        html: z.string().describe("The HTML content of the resume which can be converted to PDF using any library like puppeteer")
     })
 
-    const prompt = `You are a professional Resume Designer and ATS Optimization Expert. 
-Your goal is to output an exceptional, tailored HTML resume for a candidate targeting a specific job.
+    const prompt = `Generate resume for a candidate with the following details:
+                        Resume: ${resume}
+                        Self Description: ${selfDescription}
+                        Job Description: ${jobDescription}
 
-Input Details:
-- Candidate's Resume: ${resume || 'None provided'}
-- Candidate's Self-Description: ${selfDescription || 'None provided'}
-- Target Job Description: ${jobDescription}
-
-HTML & STYLING GUIDELINES (CRITICAL FOR A GORGEOUS PDF):
-1. Layout & Styling:
-   - Use clean, premium sans-serif typography (e.g., 'Helvetica Neue', 'Arial', sans-serif) with a font-size of 10pt to 11pt for readability.
-   - Set a sophisticated, modern color theme:
-     - Primary headings: Deep Navy/Slate (#1e293b)
-     - Body text: Dark Charcoal (#334155)
-     - Accents/Separators: Sleek Light Grey (#cbd5e1 or #e2e8f0)
-   - Do NOT use wild, overly bright neon background colors. The background MUST be pure white (#ffffff).
-   - Use a clear visual hierarchy: Name in large bold text (22-26px) at the top center, followed by a neat subtitle row containing email, phone, LinkedIn, and portfolio link separated by bullets (•).
-   - Ensure clean spacing (margin-bottom of 10-15px on sections, margin-bottom of 6-8px on job descriptions).
-   - Utilize a clean page design with proper CSS margins and print breaks:
-     \`\`\`css
-     @page {
-         size: A4;
-         margin: 15mm 15mm 15mm 15mm;
-     }
-     body {
-         font-family: 'Helvetica Neue', Arial, sans-serif;
-         color: #334155;
-         line-height: 1.4;
-         margin: 0;
-         padding: 0;
-         background: #ffffff;
-     }
-     .container {
-         width: 100%;
-         max-width: 800px;
-         margin: 0 auto;
-     }
-     .header {
-         text-align: center;
-         margin-bottom: 20px;
-     }
-     .name {
-         font-size: 24px;
-         font-weight: 700;
-         color: #1e293b;
-         margin: 0 0 5px 0;
-         letter-spacing: -0.5px;
-     }
-     .contact-info {
-         font-size: 9.5pt;
-         color: #64748b;
-     }
-     .section-title {
-         font-size: 11pt;
-         font-weight: 700;
-         color: #1e293b;
-         text-transform: uppercase;
-         letter-spacing: 0.05em;
-         border-bottom: 1.5px solid #cbd5e1;
-         padding-bottom: 3px;
-         margin-top: 18px;
-         margin-bottom: 10px;
-     }
-     .job-entry {
-         margin-bottom: 12px;
-         page-break-inside: avoid;
-     }
-     .job-header {
-         display: flex;
-         justify-content: space-between;
-         font-weight: 700;
-         color: #1e293b;
-         margin-bottom: 3px;
-         font-size: 10.5pt;
-     }
-     .job-company {
-         font-style: italic;
-         color: #475569;
-         font-size: 10pt;
-     }
-     .bullet-list {
-         margin: 4px 0 0 16px;
-         padding: 0;
-     }
-     .bullet-list li {
-         margin-bottom: 4px;
-         font-size: 9.5pt;
-         color: #334155;
-     }
-     .skills-category {
-         margin-bottom: 8px;
-         font-size: 10pt;
-     }
-     .skills-label {
-         font-weight: 700;
-         color: #1e293b;
-     }
-     \`\`\`
-
-2. Content Optimization & ATS Friendliness:
-   - Ensure the HTML is perfectly semantic: use <h1>, <section>, <ul>, <li>, and <p> tags so ATS parsers can easily read the output.
-   - Refactor the candidate's existing experience to align with keywords from the target Job Description, framing achievements with action-oriented verbs and quantifiable business impact metrics (e.g., "Increased page performance by 40%", "Accelerated delivery time by 20%").
-   - Categorize technical skills logically (e.g., Languages, Frameworks, Databases, Tools).
-   - Ensure the resume is concise, fitting on exactly 1 or 2 pages when converted to PDF. Focus on quality rather than quantity.
-   - The final output should read as if it were written by a top-tier industry professional.
-`
+                        the response should be a JSON object with a single field "html" which contains the HTML content of the resume which can be converted to PDF using any library like puppeteer.
+                        The resume should be tailored for the given job description and should highlight the candidate's strengths and relevant experience. The HTML content should be well-formatted and structured, making it easy to read and visually appealing.
+                        The content of resume should be not sound like it's generated by AI and should be as close as possible to a real human-written resume.
+                        you can highlight the content using some colors or different font styles but the overall design should be simple and professional.
+                        The content should be ATS friendly, i.e. it should be easily parsable by ATS systems without losing important information.
+                        The resume should not be so lengthy, it should ideally be 1-2 pages long when converted to PDF. Focus on quality rather than quantity and make sure to include all the relevant information that can increase the candidate's chances of getting an interview call for the given job description.
+                    `
 
     const response = await callGeminiWithFallback(prompt, resumePdfSchema)
 
